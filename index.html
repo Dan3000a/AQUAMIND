@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Solution</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to the external CSS file -->
+</head>
+<body>
+
+<div class="surrounding">
+    <!-- Left side with logo and text -->
+    <main class="left-side">
+        <header class="left-side-picture">
+            <img src="./img/Picture.png" alt="Logo of the house"> <!-- Logo image -->
+            <p>Home Solutions</p> <!-- Company name text -->
+        </header>
+    </main>
+
+    <!-- Right side with login form -->
+    <main class="right-side">
+        <div class="heading">
+            <h2>Log In</h2> <!-- Login heading -->
+        </div>
+
+        <form action="/submit" method="POST" class="login-form">
+            <!-- Email input field -->
+            <div class="credentials">
+                <div class="input-group">
+                    <label for="email" class="visually-hidden">Email:</label> <!-- Hidden label for accessibility -->
+                    <input type="email" id="email" placeholder="e-mail" required> <!-- Email input with placeholder -->
+                </div>
+
+                <!-- Password input field -->
+                <div class="input-group">
+                    <label for="password" class="visually-hidden">Password:</label> <!-- Hidden label for accessibility -->
+                    <input type="password" id="password" placeholder="password" required> <!-- Password input with placeholder -->
+                </div>
+            </div>
+
+            <!-- Submit button for login -->
+            <div class="submit">
+                <input type="submit" value="Log In">
+            </div>
+        </form>
+
+        <!-- Registration link for new users -->
+        <div class="register-link">
+            <p>Don't have an account? <a href="./register">Register</a></p>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>
