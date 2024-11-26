@@ -15,4 +15,4 @@ __pycache__/
 logs/
 *.log.DS_Store
 .idea/
-.env
+.env/
