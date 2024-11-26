@@ -1,3 +1,5 @@
+"""Styles for the user interface, including login and registration pages."""
+
 /* General Styles */
 * {
     box-sizing: border-box; /* Ensures consistent box sizing for all elements */

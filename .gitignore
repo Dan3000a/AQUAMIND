@@ -1,0 +1,19 @@
+# Ignore virtual environment
+.venv/
+
+# Ignore config secrets
+config/secrets.py
+
+# Ignore compiled files
+__pycache__/
+*.pyc
+
+# Ignore system files
+.DS_Store
+
+# Ignore test coverage reports
+coverage/
+
+# Ignore logs
+*.log
+logs/

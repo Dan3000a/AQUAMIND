@@ -1,0 +1,1 @@
+# Purpose: Contains functions for sending a link via SMS.
