@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.getenv('API_KEY')
 
-
 # Define the API details
 BASE_URL = "https://positivity-tips.p.rapidapi.com/api/positivity"
 HEADERS = {
@@ -16,28 +15,38 @@ HEADERS = {
 }
 
 
-def get_random_quote():
-    response = requests.get(f"{BASE_URL}/quote", headers=HEADERS)
+def fetch_data(endpoint):
+    response = requests.get(f"{BASE_URL}/{endpoint}", headers=HEADERS)
     response.encoding = "utf-8"
     if response.status_code == 200:
-        return response.json().get('quote', "Stay inspired!")
-    return f"Could not fetch a quote. Status code: {response.status_code}"
+        return response.json()
+    return {"error": f"Could not fetch data. Status code: {response.status_code}"}
+
+
+def get_random_quote(max_length=120):
+    data = fetch_data('quote')
+    if 'quote' in data:
+        quote = data['quote']
+        # If quote is too long, try again
+        if len(quote) <= max_length:
+            return quote
+        else:
+            return "Quote is too long, please try again later."
+    return data['error']
 
 
 def get_wellness_tip():
-    response = requests.get(f"{BASE_URL}/wellness", headers=HEADERS)
-    response.encoding = "utf-8"
-    if response.status_code == 200:
-        return response.json().get('tip', "Take care of your health!")
-    return f"Could not fetch a wellness tip. Status code: {response.status_code}"
+    data = fetch_data('wellness')
+    if 'tip' in data:
+        return data['tip']
+    return data.get('error', "Could not fetch a wellness tip.")
 
 
 def get_affirmation():
-    response = requests.get(f"{BASE_URL}/affirmation", headers=HEADERS)
-    response.encoding = "utf-8"
-    if response.status_code == 200:
-        return response.json().get('affirmation', "You are capable!")
-    return f"Could not fetch an affirmation. Status code: {response.status_code}"
+    data = fetch_data('affirmation')
+    if 'affirmation' in data:
+        return data['affirmation']
+    return data.get('error', "Could not fetch an affirmation.")
 
 
 # Example usage
