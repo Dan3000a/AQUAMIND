@@ -17,3 +17,5 @@ coverage/
 # Ignore logs
 *.log
 logs/
+
+.idea/
