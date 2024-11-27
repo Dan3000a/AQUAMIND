@@ -1,5 +1,5 @@
 # Ignore virtual environment
-.venv/
+../.venv/
 
 # Ignore IDE settings
 .idea/
@@ -15,3 +15,10 @@ __pycache__/
 logs/
 *.log.DS_Store
 .idea/
+../.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
