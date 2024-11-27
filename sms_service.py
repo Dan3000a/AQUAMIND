@@ -4,6 +4,7 @@ import json
 # Base API URL
 BASE_URL = 'http://hackathons.masterschool.com:3030'
 
+
 # Utility Functions
 def save_to_file(data, filename):
     """
@@ -14,6 +15,7 @@ def save_to_file(data, filename):
     """
     with open(filename, "w") as file:
         json.dump(data, file, indent=4)
+
 
 # API Functions
 def add_new_team(team_name):
@@ -39,7 +41,7 @@ def add_new_team(team_name):
                 save_to_file({"error": res.text}, "1_TeamAdded.html")
                 return {"error": "Invalid JSON response"}
         elif res.status_code == 500 and "already exists" in res.text:
-            # Handle team name conflict.
+            # Handle team-name conflict.
             print(f"Error: Team '{team_name}' already exists.")
             return {"error": f"Team '{team_name}' already exists."}
         else:
@@ -48,6 +50,7 @@ def add_new_team(team_name):
     except requests.RequestException as e:  # Handle network issues.
         print(f"Request failed: {e}")
         return {"error": str(e)}
+
 
 def register_number(phone_number, team_name):
     """
@@ -59,7 +62,7 @@ def register_number(phone_number, team_name):
         dict: JSON response from the API or an error message.
     """
     phone_number = phone_number.lstrip("+")  # Remove '+' if present.
-    if not phone_number.isdigit():  # Validate phone number format.
+    if not phone_number.isdigit():  # Validate a phone number format.
         print("Error: Phone number must contain only digits.")
         return {"status": "Error", "description": "Invalid phone number format."}
     if not phone_number.startswith("49"):  # Ensure it starts with the German country code.
@@ -86,6 +89,7 @@ def register_number(phone_number, team_name):
     except requests.RequestException as e:  # Handle network issues.
         print(f"Request failed: {e}")
         return {"error": str(e)}
+
 
 def get_messages(team_name):
     """
@@ -114,6 +118,7 @@ def get_messages(team_name):
         print(f"Request failed: {e}")
         return {"error": str(e)}
 
+
 def send_sms(phone_number, message, sender=""):
     """
     Sends an SMS message to a specified phone number.
@@ -129,7 +134,7 @@ def send_sms(phone_number, message, sender=""):
         return {"status": "Error", "description": "Message length exceeds limit."}
 
     phone_number = phone_number.lstrip("+")  # Remove '+' if present.
-    if not phone_number.isdigit() or not phone_number.startswith("49"):  # Validate phone number format.
+    if not phone_number.isdigit() or not phone_number.startswith("49"):  # Validate the phone number format.
         print("Error: Invalid phone number format.")
         return {"status": "Error", "description": "Invalid phone number format."}
 
@@ -153,6 +158,7 @@ def send_sms(phone_number, message, sender=""):
     except requests.RequestException as e:  # Handle network issues.
         print(f"Request failed: {e}")
         return {"error": str(e)}
+
 
 # Interactive Menu
 def main():
@@ -195,6 +201,7 @@ def main():
             break
         else:
             print("Invalid choice. Please try again.")
+
 
 # Run the script
 if __name__ == "__main__":
