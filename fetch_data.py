@@ -9,10 +9,10 @@ API_KEY = os.getenv('API_KEY')
 
 # Define categories for quotes
 categories = ['inspirational', 'love', 'life', 'friendship', 'success', 'health', 'fitness'
-              'happiness', 'good', 'dreams']
+              'happiness']
 
 
-def get_random_quote(max_length=150):
+def get_random_quote(max_length=120):
     """
     Fetch a random quote from the API, ensuring it doesn't exceed the maximum length.
     Args:
@@ -49,7 +49,3 @@ def get_random_quote(max_length=150):
         except requests.exceptions.RequestException as err:
             return {"error": f"An error occurred: {err}"}
 
-
-# Example usage
-quote = get_random_quote(max_length=150)
-print(quote)
