@@ -45,7 +45,7 @@ def send_reminder(username):
 
     # Construct the reminder message
     reminder_message = (
-        f"{motivational_message} Don't forget to drink approximately {water_per_notification} liters of water."
+        f"{motivational_message} Don't forget to drink {water_per_notification} l."
     )
 
     # Get user phone number
