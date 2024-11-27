@@ -9,6 +9,7 @@ from sms_service import send_sms  # Import the real send_sms function
 NOTIFICATION_LIMIT = 3
 NOTIFICATION_INTERVAL_MINUTES = 1
 
+
 def send_reminder(username):
     """
     Send a reminder to the user with a motivational message and water intake suggestion.
@@ -45,7 +46,7 @@ def send_reminder(username):
 
     # Construct the reminder message
     reminder_message = (
-        f"{motivational_message} Don't forget to drink {water_per_notification} l."
+        f"{motivational_message} Don't forget to drink approximately {water_per_notification} liters of water."
     )
 
     # Get user phone number
@@ -63,6 +64,36 @@ def send_reminder(username):
     save_user_data(user_data)
 
 
+def send_daily_statistics(username, water_intake, daily_target):
+    """
+    Send daily statistics to the user summarizing their water intake.
+
+    Args:
+        username (str): The user's name.
+        water_intake (float): The total water intake for the day in liters.
+        daily_target (float): The user's daily water intake target in liters.
+    """
+    # Calculate percentage of daily target reached
+    percentage = (water_intake / daily_target) * 100
+
+    # Determine the message based on the percentage
+    if percentage < 50:
+        message = "You're doing great, but could drink more. Stay hydrated tomorrow!"
+    elif 50 <= percentage < 80:
+        message = "Good job! You're on the right track, but there's room for improvement. Keep it up!"
+    elif percentage >= 100:
+        message = "Awesome! You hit your water goal today. Keep it up, you're doing amazing!"
+    else:
+        message = "Great job! You're doing well, but there's always room to improve!"
+
+    # Get user phone number
+    phone_number = load_user_data().get(username, {}).get("phoneNumber", "Unknown Number")
+
+    # Send the message to the user
+    send_sms(phone_number, message)
+    print(f"Daily statistics sent to {username}: {message}")
+
+
 def schedule_reminders():
     """
     Schedule reminders for all users at 1-2 minute intervals.
@@ -74,6 +105,22 @@ def schedule_reminders():
         schedule.every(NOTIFICATION_INTERVAL_MINUTES).minutes.do(send_reminder, username=username)
 
 
+def schedule_daily_statistics_reminders():
+    """
+    Schedule daily statistics messages for all users at a set time.
+    """
+    user_data = load_user_data()
+
+    for username, user in user_data.items():
+        water_intake = user.get("water_intake", 0)  # Ensure this is being updated properly
+        daily_target = user.get("daily_target", 0)
+
+        # Schedule daily statistics at 8 PM
+        schedule.every().day.at("20:00").do(send_daily_statistics, username=username,
+                                            water_intake=water_intake,
+                                            daily_target=daily_target)
+
+
 if __name__ == "__main__":
     # Initialize reminders_sent to 0 for all users
     user_data = load_user_data()
@@ -83,6 +130,7 @@ if __name__ == "__main__":
 
     print("Starting AquaMind Reminder Scheduler...")
     schedule_reminders()
+    schedule_daily_statistics_reminders()
 
     # Run the scheduler
     while True:
