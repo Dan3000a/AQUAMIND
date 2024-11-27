@@ -1,3 +1,4 @@
+
 import requests
 import json
 
@@ -26,28 +27,34 @@ def add_new_team(team_name):
     Returns:
         dict: JSON response from the API or an error message.
     """
+    # Validate team name
+    team_name = team_name.strip()
+    if not team_name or not team_name.isalpha():
+        print("Error: Team name must contain only letters and cannot be blank.")
+        return {"status": "Error", "description": "Invalid team name."}
+
     url = f"{BASE_URL}/team/addNewTeam"
-    data = {"teamName": team_name}  # Team name to be sent in the request.
+    data = {"teamName": team_name}  # Prepare the request payload.
 
     try:
         res = requests.post(url, json=data)  # Send the POST request.
-        print(f"Raw Response Text: {res.text}")  # Log raw response for debugging.
+        print(f"Raw Response Text: {res.text}")  # Log the raw response.
+
         if res.status_code == 200:  # Check if the request was successful.
             try:
-                response_json = res.json()  # Parse JSON response.
+                response_json = res.json()  # Parse the response as JSON.
                 save_to_file(response_json, "1_TeamAdded.html")  # Save response to file.
                 return response_json
-            except json.JSONDecodeError:  # Handle invalid JSON response.
-                save_to_file({"error": res.text}, "1_TeamAdded.html")
+            except json.JSONDecodeError:
+                save_to_file({"error": res.text}, "1_TeamAdded.html")  # Handle invalid JSON.
                 return {"error": "Invalid JSON response"}
         elif res.status_code == 500 and "already exists" in res.text:
-            # Handle team-name conflict.
             print(f"Error: Team '{team_name}' already exists.")
             return {"error": f"Team '{team_name}' already exists."}
         else:
-            save_to_file({"error": res.text}, "1_TeamAdded.html")  # Save any other errors.
+            save_to_file({"error": res.text}, "1_TeamAdded.html")
             return {"error": res.text}
-    except requests.RequestException as e:  # Handle network issues.
+    except requests.RequestException as e:
         print(f"Request failed: {e}")
         return {"error": str(e)}
 
@@ -61,11 +68,13 @@ def register_number(phone_number, team_name):
     Returns:
         dict: JSON response from the API or an error message.
     """
-    phone_number = phone_number.lstrip("+")  # Remove '+' if present.
-    if not phone_number.isdigit():  # Validate a phone number format.
-        print("Error: Phone number must contain only digits.")
+    phone_number = phone_number.strip().lstrip("+")  # Remove '+' and spaces.
+
+    # Validate phone number format
+    if not phone_number.isdigit():
+        print("Error: Phone number must only contain digits.")
         return {"status": "Error", "description": "Invalid phone number format."}
-    if not phone_number.startswith("49"):  # Ensure it starts with the German country code.
+    if not phone_number.startswith("49"):
         print("Error: Phone number must start with country code '49'.")
         return {"status": "Error", "description": "Phone number must start with country code 49."}
 
@@ -74,19 +83,20 @@ def register_number(phone_number, team_name):
 
     try:
         res = requests.post(url, json=data)  # Send the POST request.
-        print(f"Raw Response Text: {res.text}")  # Log raw response for debugging.
-        if res.status_code == 200:  # Check if the request was successful.
+        print(f"Raw Response Text: {res.text}")  # Log the raw response.
+
+        if res.status_code == 200:
             try:
-                response_json = res.json()
+                response_json = res.json()  # Parse the response as JSON.
                 save_to_file(response_json, "2_outputRegNum.html")  # Save response to file.
                 return response_json
-            except json.JSONDecodeError:  # Handle invalid JSON response.
-                save_to_file({"error": res.text}, "2_outputRegNum.html")
+            except json.JSONDecodeError:
+                save_to_file({"error": res.text}, "2_outputRegNum.html")  # Handle invalid JSON.
                 return {"error": "Invalid JSON response"}
         else:
-            save_to_file({"error": res.text}, "2_outputRegNum.html")  # Save any other errors.
+            save_to_file({"error": res.text}, "2_outputRegNum.html")
             return {"error": res.text}
-    except requests.RequestException as e:  # Handle network issues.
+    except requests.RequestException as e:
         print(f"Request failed: {e}")
         return {"error": str(e)}
 
@@ -100,21 +110,23 @@ def get_messages(team_name):
         dict: JSON response from the API or an error message.
     """
     url = f"{BASE_URL}/team/getMessages/{team_name}"  # API endpoint.
+
     try:
         res = requests.get(url)  # Send the GET request.
-        print(f"Raw Response Text: {res.text}")  # Log raw response for debugging.
-        if res.status_code == 200:  # Check if the request was successful.
+        print(f"Raw Response Text: {res.text}")  # Log the raw response.
+
+        if res.status_code == 200:
             try:
-                response_json = res.json()
+                response_json = res.json()  # Parse the response as JSON.
                 save_to_file(response_json, "3_outputMessages.html")  # Save response to file.
                 return response_json
-            except json.JSONDecodeError:  # Handle invalid JSON response.
-                save_to_file({"error": res.text}, "3_outputMessages.html")
+            except json.JSONDecodeError:
+                save_to_file({"error": res.text}, "3_outputMessages.html")  # Handle invalid JSON.
                 return {"error": "Invalid JSON response"}
         else:
-            save_to_file({"error": res.text}, "3_outputMessages.html")  # Save any other errors.
+            save_to_file({"error": res.text}, "3_outputMessages.html")
             return {"error": res.text}
-    except requests.RequestException as e:  # Handle network issues.
+    except requests.RequestException as e:
         print(f"Request failed: {e}")
         return {"error": str(e)}
 
@@ -129,12 +141,12 @@ def send_sms(phone_number, message, sender=""):
     Returns:
         dict: JSON response from the API or an error message.
     """
-    if len(message) > 160:  # Validate message length.
+    if len(message) > 160:
         print(f"Error: Message exceeds 160 characters ({len(message)}).")
         return {"status": "Error", "description": "Message length exceeds limit."}
 
-    phone_number = phone_number.lstrip("+")  # Remove '+' if present.
-    if not phone_number.isdigit() or not phone_number.startswith("49"):  # Validate the phone number format.
+    phone_number = phone_number.strip().lstrip("+")  # Remove '+' and spaces.
+    if not phone_number.isdigit() or not phone_number.startswith("49"):
         print("Error: Invalid phone number format.")
         return {"status": "Error", "description": "Invalid phone number format."}
 
@@ -143,19 +155,20 @@ def send_sms(phone_number, message, sender=""):
 
     try:
         res = requests.post(url, json=data)  # Send the POST request.
-        print(f"Raw Response Text: {res.text}")  # Log raw response for debugging.
-        if res.status_code == 200:  # Check if the request was successful.
+        print(f"Raw Response Text: {res.text}")  # Log the raw response.
+
+        if res.status_code == 200:
             try:
-                response_json = res.json()
+                response_json = res.json()  # Parse the response as JSON.
                 save_to_file(response_json, "4_outputSendSMS.html")  # Save response to file.
                 return response_json
-            except json.JSONDecodeError:  # Handle invalid JSON response.
-                save_to_file({"error": res.text}, "4_outputSendSMS.html")
+            except json.JSONDecodeError:
+                save_to_file({"error": res.text}, "4_outputSendSMS.html")  # Handle invalid JSON.
                 return {"error": "Invalid JSON response"}
         else:
-            save_to_file({"error": res.text}, "4_outputSendSMS.html")  # Save any other errors.
+            save_to_file({"error": res.text}, "4_outputSendSMS.html")
             return {"error": res.text}
-    except requests.RequestException as e:  # Handle network issues.
+    except requests.RequestException as e:
         print(f"Request failed: {e}")
         return {"error": str(e)}
 
@@ -174,33 +187,33 @@ def main():
         print("4. Send SMS")
         print("5. Exit")
 
-        choice = input("Enter your choice: ")
+        choice = input("Enter your choice: ").strip()
         if choice == "1":
-            team_name = input("Enter team name: ")
+            team_name = input("Enter team name: ").strip()
             response = add_new_team(team_name)
             if "already exists" in response.get("error", ""):
                 print("Please choose a different team name.")
             print("Response:", response)
         elif choice == "2":
-            phone_number = input("Enter phone number (e.g., +49123456789): ")
-            team_name = input("Enter team name: ")
+            phone_number = input("Enter phone number (e.g., +49123456789): ").strip()
+            team_name = input("Enter team name: ").strip()
             response = register_number(phone_number, team_name)
             print("Response:", response)
         elif choice == "3":
-            team_name = input("Enter team name: ")
+            team_name = input("Enter team name: ").strip()
             response = get_messages(team_name)
             print("Messages:", response)
         elif choice == "4":
-            phone_number = input("Enter phone number (e.g., +49123456789): ")
-            message = input("Enter message: ")
-            sender = input("Enter sender (or leave blank): ")
+            phone_number = input("Enter phone number (e.g., +49123456789): ").strip()
+            message = input("Enter message: ").strip()
+            sender = input("Enter sender (or leave blank): ").strip()
             response = send_sms(phone_number, message, sender)
             print("Response:", response)
         elif choice == "5":
             print("Exiting SMS Service...")
             break
         else:
-            print("Invalid choice. Please try again.")
+            print("Invalid choice. Please enter a valid option.")
 
 
 # Run the script
