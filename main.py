@@ -1,0 +1,122 @@
+import time
+from user_management import register_user
+from schedule_management import schedule_reminders, send_reminder, handle_user_response, schedule_daily_statistics_reminders, send_daily_statistics
+import schedule
+from sms_service import send_sms, get_messages
+
+def send_sms_real(phone_number, message):
+    """
+    Sends an SMS via the SMS service.
+    """
+    response = send_sms(phone_number, message)
+    if response.get("status") == "Success":
+        print(f"SMS sent to {phone_number}: {message}")
+    else:
+        print(f"Failed to send SMS to {phone_number}: {response.get('description')}")
+
+def fetch_user_response(phone_number, team_name, timeout=60, poll_interval=10):
+    """
+    Polls for user responses within a timeout period.
+    """
+    elapsed_time = 0
+    while elapsed_time < timeout:
+        messages_response = get_messages(team_name)  # Fetch messages for the team
+
+        # Print the response to understand its structure
+        print("Received messages_response:", messages_response)
+
+        if isinstance(messages_response, list):  # Check if it's a list
+            for message_group in messages_response:
+                # Each group is a dictionary where the key is the phone number
+                for phone, messages in message_group.items():
+                    if phone == phone_number:
+                        for message in messages:
+                            return message.get("text", "").strip().lower()
+        else:
+            print("Error: Expected a list of messages, but got:", type(messages_response))
+
+        time.sleep(poll_interval)
+        elapsed_time += poll_interval
+    return "skip"  # Default response if no reply is received within the timeout
+
+def process_registration(phone_number, message):
+    """
+    Processes the registration message from the user and adds them to the system.
+    """
+    try:
+        user_details = message.split()
+        if len(user_details) != 4:
+            raise ValueError("Incorrect input format.")
+
+        username, age, weight, gender = user_details
+        if not age.isdigit() or not weight.replace('.', '', 1).isdigit():
+            raise ValueError("Age must be an integer and weight a float.")
+
+        age = int(age)
+        weight = float(weight)
+        gender = gender.lower()
+        if gender not in ['male', 'female']:
+            raise ValueError("Gender must be 'male' or 'female'.")
+
+        # Register the user
+        result_message = register_user(username, phone_number, gender, age, weight)
+        send_sms_real(phone_number, result_message)
+
+        if "Welcome" in result_message:
+            # Now, schedule reminders and daily statistics
+            schedule_reminders()
+            schedule_daily_statistics_reminders()
+
+            # Send the first reminder immediately
+            send_reminder(username)
+
+    except ValueError as e:
+        send_sms_real(phone_number, f"Invalid input: {e}. Please try again.")
+
+def handle_incoming_message(phone_number, message):
+    """
+    Handles incoming SMS messages and processes user data input for registration.
+    """
+    process_registration(phone_number, message)  # Register the user
+
+def main():
+    """
+    Handles SMS-based user interaction.
+    """
+    print("Starting AquaMind SMS Service...")
+
+    phone_number = input("Enter phone number: ").strip()
+    team_name = "WaterProof"  # Set your team name here
+
+    # Register the phone number with the team
+    subscribe_message = f"SUBSCRIBE {team_name}"
+    send_sms_real(phone_number, subscribe_message)  # Send subscription message
+
+    # Wait for the user's response via SMS
+    print("Waiting for user registration details via SMS...")
+    message = fetch_user_response(phone_number, team_name, timeout=120)  # 2-minute timeout for response
+
+    if message.lower() == "exit":
+        print("Exiting.")
+        return
+
+    # Process the registration and send the first reminder
+    handle_incoming_message(phone_number, message)
+
+    # Loop for 3 reminders and process user responses
+    for _ in range(3):  # 3 reminders
+        username = message.split()[0]  # Extract username for reminder
+        send_reminder(username)  # Send reminder SMS
+        user_response = fetch_user_response(phone_number, team_name)  # Poll for response
+        handle_user_response(username, user_response)  # Process the response
+
+        # Run scheduled tasks in the background (non-blocking)
+        schedule.run_pending()
+        time.sleep(1)
+
+    # Fetch user information to send statistics
+    username = message.split()[0]
+    send_daily_statistics(username)  # Send daily statistics once
+
+if __name__ == "__main__":
+    main()
